@@ -11,15 +11,14 @@ app.use(express.json());
 
 const users = [];
 
-function checksExistsUserAccount(requestuest, response, next) {
-    const { username, } = requestuest.headers;
+function checksExistsUserAccount(request, response, next) {
+    const { username } = request.headers;
     const user = users.find((user) => user.username === username);
     if(!user) {
        return response.status(404).json({ error: "Esse usário não existe"})
     }
     
     request.user = user;
-
     next();
 } 
 
@@ -45,13 +44,21 @@ app.post('/users', (request, response) => {
         todos: []
     })
 
-    return response.status(201).send();
+    const user = {
+        id: uuidv4(),
+        name,
+        username,
+        todos: []
+    }
+
+   
+    return response.status(201).json(user);
 
 });
 
 app.get('/todos', checksExistsUserAccount, (request, response) => {
-    const { user } = request
-    return response.status(200).json(user.todos);
+    const { user } = request;
+    return response.json(user.todos);
 });
 
 app.post('/todos', checksExistsUserAccount, (request, response) => {
@@ -80,7 +87,7 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
     const todoIndex = user.todos.indexOf(user.todos[id])
 
     if(todoIndex == -1) {
-        return response.status(400).json({ error: "inavalid id!"})
+        return response.status(404).json({ error: "inavalid id!"})
     }
 
     user.todos[todoIndex -1].title = title;
@@ -90,13 +97,13 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
 });
 
 app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
-    const { user }= request;
+    const { user } = request;
     const { id } = request.params;
 
     const todoIndex = user.todos.indexOf(user.todos[id])
 
     if(todoIndex == -1) {
-        return response.status(400).json({ error: "inavalid id!"})
+        return response.status(404).json({ error: "inavalid id!"})
     }
 
     user.todos[todoIndex -1].done = true;
@@ -112,11 +119,11 @@ app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
     const todoIndex = user.todos.indexOf(user.todos[id])
 
     if(todoIndex == -1) {
-        return response.status(400).json({ error: "inavalid id!"})
+        return response.status(404).json({ error: "inavalid id!"})
     }
     user.todos.splice(todoIndex -1, 1);
 
-    return response.send();
+    return response.status(204).send();
 });
 
 module.exports = app;
