@@ -58,6 +58,7 @@ app.post('/users', (request, response) => {
 
 app.get('/todos', checksExistsUserAccount, (request, response) => {
     const { user } = request;
+    console.log("Usuário: "+ user);
     return response.json(user.todos);
 });
 
@@ -76,7 +77,7 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
     };
 
     user.todos.push(newTodoItem);
-    return response.status(201).send();
+    return response.status(201).json(newTodoItem);
 });
 
 app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
